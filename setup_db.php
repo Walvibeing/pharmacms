@@ -8,6 +8,9 @@ if (($_GET['token'] ?? '') !== $SETUP_TOKEN) {
     die('Forbidden');
 }
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
 
@@ -211,7 +214,7 @@ echo "<h1>PharmaCMS Database Setup</h1><pre>\n";
 
 foreach ($tables as $name => $sql) {
     try {
-        $pdo->exec($sql);
+        get_db()->exec($sql);
         $results[] = "✅ Table '$name' created/exists";
         echo "✅ Table '$name' OK\n";
     } catch (PDOException $e) {
@@ -222,12 +225,12 @@ foreach ($tables as $name => $sql) {
 
 // Create admin user
 try {
-    $existing = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $existing = get_db()->prepare("SELECT id FROM users WHERE email = ?");
     $existing->execute([$adminEmail]);
     if ($existing->fetch()) {
         echo "\n✅ Admin user already exists: $adminEmail\n";
     } else {
-        $stmt = $pdo->prepare("INSERT INTO users (email, name, role, is_active) VALUES (?, ?, 'super_admin', 1)");
+        $stmt = get_db()->prepare("INSERT INTO users (email, name, role, is_active) VALUES (?, ?, 'super_admin', 1)");
         $stmt->execute([$adminEmail, $adminName]);
         echo "\n✅ Admin user created: $adminEmail ($adminName)\n";
     }

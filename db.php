@@ -6,16 +6,17 @@ function get_db() {
     if ($pdo === null) {
         try {
             $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
-            $pdo = new PDO(
-                $dsn,
-                DB_USER,
-                DB_PASS,
-                [
+            $options = [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     PDO::ATTR_EMULATE_PREPARES => false,
-                ]
-            );
+                ];
+            // Azure MySQL requires SSL
+            if (strpos(DB_HOST, 'azure.com') !== false) {
+                $options[PDO::MYSQL_ATTR_SSL_CA] = '/var/ssl/certs/DigiCertGlobalRootCA.crt.pem';
+                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+            }
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
             error_log('Database connection failed: ' . $e->getMessage());
             die('A system error occurred. Please try again later.');
