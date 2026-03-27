@@ -13,7 +13,7 @@ function get_db() {
                 ];
             // Azure MySQL requires SSL
             if (strpos(DB_HOST, 'azure.com') !== false) {
-                $options[PDO::MYSQL_ATTR_SSL_CA] = '/var/ssl/certs/DigiCertGlobalRootCA.crt.pem';
+                $options[PDO::MYSQL_ATTR_SSL_CA] = '';
                 $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
             }
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);

@@ -21,15 +21,8 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
         PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+        PDO::MYSQL_ATTR_SSL_CA => '',
     ];
-    // Try Azure DigiCert CA if it exists
-    $caCert = '/var/ssl/certs/DigiCertGlobalRootCA.crt.pem';
-    if (!file_exists($caCert)) {
-        $caCert = '/var/ssl/certs/BaltimoreCyberTrustRoot.crt.pem';
-    }
-    if (file_exists($caCert)) {
-        $options[PDO::MYSQL_ATTR_SSL_CA] = $caCert;
-    }
     $setupDb = new PDO($dsn, DB_USER, DB_PASS, $options);
 } catch (PDOException $e) {
     echo "<h1>DB Connection Failed</h1><pre>" . $e->getMessage() . "\n\nHost: " . DB_HOST . "\nDB: " . DB_NAME . "\nUser: " . DB_USER . "</pre>";
