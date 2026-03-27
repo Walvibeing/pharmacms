@@ -12,7 +12,29 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/db.php';
+
+// Direct DB connection for setup (bypasses db.php die())
+try {
+    $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+    ];
+    // Try Azure DigiCert CA if it exists
+    $caCert = '/var/ssl/certs/DigiCertGlobalRootCA.crt.pem';
+    if (!file_exists($caCert)) {
+        $caCert = '/var/ssl/certs/BaltimoreCyberTrustRoot.crt.pem';
+    }
+    if (file_exists($caCert)) {
+        $options[PDO::MYSQL_ATTR_SSL_CA] = $caCert;
+    }
+    $setupDb = new PDO($dsn, DB_USER, DB_PASS, $options);
+} catch (PDOException $e) {
+    echo "<h1>DB Connection Failed</h1><pre>" . $e->getMessage() . "\n\nHost: " . DB_HOST . "\nDB: " . DB_NAME . "\nUser: " . DB_USER . "</pre>";
+    exit;
+}
 
 $adminEmail = $_GET['admin_email'] ?? 'andrew.wallis@alliedpharmacies.com';
 $adminName = $_GET['admin_name'] ?? 'Andrew Wallis';
@@ -214,7 +236,7 @@ echo "<h1>PharmaCMS Database Setup</h1><pre>\n";
 
 foreach ($tables as $name => $sql) {
     try {
-        get_db()->exec($sql);
+        $setupDb->exec($sql);
         $results[] = "✅ Table '$name' created/exists";
         echo "✅ Table '$name' OK\n";
     } catch (PDOException $e) {
@@ -225,12 +247,12 @@ foreach ($tables as $name => $sql) {
 
 // Create admin user
 try {
-    $existing = get_db()->prepare("SELECT id FROM users WHERE email = ?");
+    $existing = $setupDb->prepare("SELECT id FROM users WHERE email = ?");
     $existing->execute([$adminEmail]);
     if ($existing->fetch()) {
         echo "\n✅ Admin user already exists: $adminEmail\n";
     } else {
-        $stmt = get_db()->prepare("INSERT INTO users (email, name, role, is_active) VALUES (?, ?, 'super_admin', 1)");
+        $stmt = $setupDb->prepare("INSERT INTO users (email, name, role, is_active) VALUES (?, ?, 'super_admin', 1)");
         $stmt->execute([$adminEmail, $adminName]);
         echo "\n✅ Admin user created: $adminEmail ($adminName)\n";
     }
