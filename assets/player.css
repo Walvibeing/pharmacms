@@ -1,0 +1,125 @@
+/* ============================================
+   PharmaCMS — Screen Player CSS
+   Minimal full-screen display for signage screens
+   ============================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    cursor: none;
+}
+
+#player {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    z-index: 1;
+}
+
+.slide.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Emergency overlay */
+.emergency-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #dc2626;
+    color: #fff;
+    text-align: center;
+    padding: 12px 20px;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    z-index: 100;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    animation: emergencyPulse 2s ease-in-out infinite;
+}
+
+@keyframes emergencyPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Blank screen */
+.blank-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    color: #333;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 14px;
+}
+
+/* Loading indicator */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #444;
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #333;
+    border-top-color: #4f46e5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 12px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Connection status indicator (bottom-right, barely visible) */
+.connection-status {
+    position: fixed;
+    bottom: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    z-index: 50;
+    opacity: 0.4;
+}
+
+.connection-status.connected { background: #10b981; }
+.connection-status.disconnected { background: #ef4444; }

@@ -1,0 +1,15 @@
+# Deny all PHP execution in uploads directory
+php_flag engine off
+
+# Fallback: deny executable extensions
+<FilesMatch "\.(php|phtml|phar|php5|php7|phps|shtml|cgi|pl|py|rb|sh|bash)$">
+    Require all denied
+</FilesMatch>
+
+# Prevent MIME type sniffing
+Header set X-Content-Type-Options "nosniff"
+
+# Only allow safe file types
+<FilesMatch "\.(jpg|jpeg|png|gif|mp4|webm|svg)$">
+    Require all granted
+</FilesMatch>
